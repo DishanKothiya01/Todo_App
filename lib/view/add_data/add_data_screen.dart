@@ -22,6 +22,11 @@ class AddDataScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    con.title.value.text = con.todoModel.title ?? '';
+    con.description.value.text = con.todoModel.description ?? '';
+    con.todoId.value = con.todoModel.id ?? '';
+    con.isCompleted.value = con.todoModel.isCompleted ?? false;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.gradientEnd.withAlpha(50),
@@ -70,60 +75,102 @@ class AddDataScreen extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         color: AppColors.gradientEnd.withAlpha(50),
         height: 140,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            con.isLoading.value
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : AppButton(
-                    onPressed: () async {
-                      if (con.validation()) {
-                        FocusScope.of(context).unfocus();
-                        con.isLoading.value = true;
+        child: con.todoId.isEmpty
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  con.isLoading.value
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : AppButton(
+                          onPressed: () async {
+                            if (con.validation()) {
+                              FocusScope.of(context).unfocus();
+                              con.isLoading.value = true;
 
-                        /// CREATE LOCATION API
-                        await HomeRepository.createTodoApi(
-                          isLoader: con.isLoading,
-                          title: con.title.value.text,
-                          description: con.description.value.text,
-                          isCompleted: false,
-                          onSuccess: () async {
-                            final HomeController homeController = Get.find<HomeController>();
-                            homeController.todoList.add(
-                              GetTodoModel(
+                              /// CREATE TODO-DATA API
+                              await HomeRepository.createTodoApi(
+                                isLoader: con.isLoading,
                                 title: con.title.value.text,
                                 description: con.description.value.text,
                                 isCompleted: false,
-                              ),
-                            );
-                            printTitle(homeController.todoList);
+                                onSuccess: () async {
+                                  final HomeController homeController = Get.find<HomeController>();
+                                  homeController.todoList.add(
+                                    GetTodoModel(
+                                      title: con.title.value.text,
+                                      description: con.description.value.text,
+                                      isCompleted: false,
+                                    ),
+                                  );
+                                  printTitle(homeController.todoList);
+                                },
+                              );
+                              con.clearData();
+                              Get.back();
+                            }
                           },
-                        );
-                        con.clearData();
-                        Get.back();
-                      }
+                          title: 'Save',
+                          backgroundColor: AppColors.kPrimaryColor,
+                          titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
+                                fontFamily: 'Bodoni',
+                              ),
+                        ),
+                  (defaultPadding / 2).verticalSpace,
+                  AppButton(
+                    onPressed: () {
+                      con.clearData();
                     },
-                    title: 'Save',
-                    backgroundColor: AppColors.kPrimaryColor,
+                    title: 'Cancel',
+                    backgroundColor: AppColors.redColor,
                     titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
                           fontFamily: 'Bodoni',
                         ),
                   ),
-            (defaultPadding / 2).verticalSpace,
-            AppButton(
-              onPressed: () {
-                con.clearData();
-              },
-              title: 'Cancel',
-              backgroundColor: AppColors.redColor,
-              titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
-                    fontFamily: 'Bodoni',
-                  ),
-            ),
-          ],
-        ),
+                ],
+              )
+            : Center(
+                child: con.isLoading.value
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : AppButton(
+                        onPressed: () async {
+                          if (con.validation()) {
+                            FocusScope.of(context).unfocus();
+                            con.isLoading.value = true;
+
+                            /// UPDATE A TODO DATA
+                            await HomeRepository.upDateTodoApi(
+                              todoId: con.todoId.value,
+                              isLoader: con.isLoading,
+                              title: con.title.value.text,
+                              description: con.description.value.text,
+                              isCompleted: con.isCompleted.value,
+                              onSuccess: () async {
+                                final HomeController homeController = Get.find<HomeController>();
+                                homeController.todoList[con.index] = GetTodoModel(
+                                  id: con.todoModel.id,
+                                  title: con.title.value.text,
+                                  description: con.description.value.text,
+                                  isCompleted: con.todoModel.isCompleted,
+                                );
+
+                                homeController.todoList.refresh();
+                              },
+                            );
+                            con.clearData();
+                            Get.back();
+                          }
+                        },
+                        title: 'UPDATE',
+                        backgroundColor: AppColors.kPrimaryColor,
+                        titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
+                              fontFamily: 'Bodoni',
+                            ),
+                      ),
+              ),
       ),
     );
   }

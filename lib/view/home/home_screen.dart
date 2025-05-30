@@ -6,11 +6,11 @@ import 'package:todo_app/res/pull_to_refresh_indicator.dart';
 import 'package:todo_app/utils/appAssets.dart';
 import 'package:todo_app/utils/app_text_style.dart';
 import 'package:todo_app/utils/utils.dart';
-import 'package:todo_app/view/add_data/add_data_screen.dart';
 import 'package:todo_app/view/home/home_controller.dart';
-
+import '../../data/model/get_todo_model.dart';
 import '../../res/app_colors.dart';
-import 'components/key_value_widget.dart';
+import '../../utils/color_print.dart';
+import '../../utils/routs/app_routs.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Get.to(AddDataScreen());
+          Get.toNamed(AppRoutes.addDataScreen);
         },
         child: Icon(Icons.add),
       ),
@@ -95,8 +95,31 @@ class HomeScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     GestureDetector(
-                                      onTap: ()async {
-                                        // handle here data.isCompleted with true and false with toggle
+                                      onTap: () async {
+                                        // final updatedValue = !(data.isCompleted ?? false);
+
+                                        final updatedValue = !(data.isCompleted ?? false);
+
+                                        await HomeRepository.upDateTodoApi(
+                                          isLoader: con.isLoading,
+                                          title: data.title ?? '',
+                                          description: data.description ?? '',
+                                          isCompleted: updatedValue,
+                                          todoId: data.id ?? '',
+                                          onSuccess: () {
+                                            con.todoList.value = con.todoList.map((item) {
+                                              if (item.id == data.id) {
+                                                return GetTodoModel(
+                                                  id: item.id,
+                                                  title: item.title,
+                                                  description: item.description,
+                                                  isCompleted: updatedValue,
+                                                );
+                                              }
+                                              return item;
+                                            }).toList();
+                                          },
+                                        );
                                       },
                                       child: CircleAvatar(
                                         child: data.isCompleted == true
@@ -121,14 +144,14 @@ class HomeScreen extends StatelessWidget {
                                               color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.backgroundDark,
                                               fontSize: 18.sp,
                                               fontFamily: 'Bodoni',
-                                              decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
+                                              // decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
                                             ),
                                             maxLines: 1,
                                           ),
                                           Text(
                                             '${data.description}',
                                             style: AppTextStyle.subtitleStyle(context)?.copyWith(
-                                              color: AppColors.textGreyDark,
+                                              color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.textGreyDark,
                                               fontSize: 14.sp,
                                               fontWeight: FontWeight.w500,
                                               decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
@@ -138,7 +161,12 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () {
+                                        Get.toNamed(AppRoutes.addDataScreen, arguments: {
+                                          'todoModel': data,
+                                          'index': index,
+                                        });
+                                      },
                                       child: CircleAvatar(
                                         backgroundColor: AppColors.secondaryColor.withAlpha(60),
                                         child: Image.asset(
@@ -150,7 +178,13 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     (defaultPadding / 2).horizontalSpace,
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () async {
+                                        if (!isValEmpty(data.id)) {
+                                          await HomeRepository.deleteTodoDataApi(isLoader: con.isLoading, todoId: data.id!, onSuccess: () {});
+                                        } else {
+                                          printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
+                                        }
+                                      },
                                       child: CircleAvatar(
                                         backgroundColor: AppColors.redColor.withAlpha(60),
                                         child: Image.asset(

@@ -82,4 +82,75 @@ class HomeRepository {
     }
   }
 
+  /// ***********************************************************************************
+  /// *                               UPDATE TODO_DATA                                   *
+  /// ***********************************************************************************
+  static Future<void> upDateTodoApi({
+    RxBool? isLoader,
+    required String title,
+    required String description,
+    required bool isCompleted,
+    required String todoId,
+    Function()? onSuccess,
+  }) async {
+    if (await getConnectivityResult(isLoader: isLoader)) {
+      try {
+        isLoader?.value = true;
+
+        return await APIFunction.putApiCall(
+          apiName: ApiUrls.updateTodo(id: todoId),
+          body: {
+            "title": title,
+            "description": description,
+            "isCompleted": isCompleted,
+          },
+        ).then(
+          (response) {
+            if (response != null) {
+              onSuccess?.call();
+              isLoader?.value = false;
+            }
+            isLoader?.value = false;
+          },
+        );
+      } catch (e) {
+        isLoader?.value = false;
+        printErrors(type: "UpdateTODO Data Function", errText: e);
+      }
+    }
+  }
+
+  /// ***********************************************************************************
+  ///                             DELETE TodoData
+  /// ***********************************************************************************
+
+  static Future<dynamic> deleteTodoDataApi({RxBool? isLoader, required String todoId, Function()? onSuccess}) async {
+    if (await getConnectivityResult()) {
+      try {
+        isLoader?.value = true;
+
+        return await APIFunction.deleteApiCall(
+          apiName: ApiUrls.deleteTodo(id: todoId),
+        ).then(
+          (response) async {
+            if (response != null) {
+              if (Get.isRegistered<HomeController>()) {
+                final HomeController con = Get.find<HomeController>();
+                int index = con.todoList.indexWhere((e) => e.id == todoId);
+                if (index != -1) {
+                  con.todoList.removeAt(index);
+                }
+              }
+
+              if (onSuccess != null) onSuccess();
+              isLoader?.value = false;
+            }
+          },
+        );
+      } catch (e) {
+        isLoader?.value = false;
+        printErrors(type: "deleteTodoDataApi", errText: e);
+      }
+    }
+  }
 }

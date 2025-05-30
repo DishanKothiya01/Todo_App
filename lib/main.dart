@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:todo_app/utils/routs/app_page.dart';
 import 'package:todo_app/utils/routs/app_routs.dart';
 import 'package:todo_app/view/home/home_screen.dart';
 
-void main() {
+void main() async{
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -24,7 +26,6 @@ class MyApp extends StatelessWidget {
           title: 'Todo App',
           getPages: AppPages.pages,
           initialRoute: AppRoutes.homeScreen,
-
           debugShowCheckedModeBanner: false,
           // home: HomeScreen(),
         );
