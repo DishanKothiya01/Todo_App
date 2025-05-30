@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/data/model/get_user_data_model.dart';
+import 'package:todo_app/data/model/get_todo_model.dart';
 
 import '../../data/repositories/home_repository.dart';
 
 class HomeController extends GetxController{
-  RxBool isLoading = true.obs;
+  RxBool isLoading = false.obs;
 
-  RxList<GetUserDataModel> categoryList = <GetUserDataModel>[].obs;
+  RxList<GetTodoModel> todoList = <GetTodoModel>[].obs;
 
 @override
   void onReady() {
@@ -16,6 +16,6 @@ class HomeController extends GetxController{
   }
 
    void fetchData() async {
-    await HomeRepository.getUserList( isLoader: isLoading);
+    await HomeRepository.getTodoList( isLoader: isLoading);
   }
 }

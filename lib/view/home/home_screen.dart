@@ -31,13 +31,13 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Obx(
         () => con.isLoading.isFalse
-            ? con.categoryList.isNotEmpty
+            ? con.todoList.isNotEmpty
                 ? SafeArea(
                     child: ListView.builder(
-                      itemCount: con.categoryList.length,
+                      itemCount: con.todoList.length,
                       padding: EdgeInsets.all(defaultPadding / 2),
                       itemBuilder: (context, index) {
-                        final data = con.categoryList[index];
+                        final data = con.todoList[index];
                         return Container(
                           margin: EdgeInsets.all(defaultPadding / 5),
                           padding: EdgeInsets.all(defaultPadding / 5),
@@ -66,9 +66,8 @@ class HomeScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                KeyValueWidget(title: 'Name', value: data.name),
-                                KeyValueWidget(title: 'Email', value: data.email),
-                                KeyValueWidget(title: 'PhoneNumber', value: data.phoneNumber),
+                                KeyValueWidget(title: 'Title', value: data.title),
+                                KeyValueWidget(title: 'Description', value: data.description),
                               ],
                             ),
                           ),

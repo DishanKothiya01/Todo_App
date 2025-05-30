@@ -16,7 +16,7 @@ class KeyValueWidget extends StatelessWidget {
       children: [
         Text('$title :', style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.textGreyDark, fontSize: 16.sp)),
         (defaultPadding / 2).horizontalSpace,
-        Expanded(child: Text(value, style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.deliverColor, fontSize: 14.sp))),
+        Expanded(child: Text(value, style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight, fontSize: 14.sp))),
       ],
     );
   }

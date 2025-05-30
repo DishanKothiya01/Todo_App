@@ -11,7 +11,6 @@ import 'package:todo_app/utils/ui_utils.dart';
 import 'package:todo_app/utils/utils.dart';
 import '../repositories/bottom_sheet_repository.dart';
 import '../services/notification/notification_enum.dart';
-import 'api_utils.dart';
 
 class HttpUtil {
   static final HttpUtil _singleton = HttpUtil._internal();
@@ -22,7 +21,7 @@ class HttpUtil {
 
   late Dio dio;
   late CancelToken cancelToken;
-  static String apiUrl = ApiUrls.getMockUser;
+  static String apiUrl = ApiUrls.getTodoList;
 
   HttpUtil._internal() {
     cancelToken = CancelToken();

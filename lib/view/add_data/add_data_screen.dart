@@ -3,12 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:todo_app/data/repositories/home_repository.dart';
 import 'package:todo_app/res/app_button.dart';
 import 'package:todo_app/res/app_colors.dart';
 import 'package:todo_app/res/app_text_field.dart';
 import 'package:todo_app/utils/app_text_style.dart';
+import 'package:todo_app/utils/color_print.dart';
 import 'package:todo_app/utils/utils.dart';
 import 'package:todo_app/view/add_data/add_data_controller.dart';
+
+import '../../data/model/get_todo_model.dart';
+import '../home/home_controller.dart';
 
 class AddDataScreen extends StatelessWidget {
   AddDataScreen({super.key});
@@ -31,26 +36,26 @@ class AddDataScreen extends StatelessWidget {
             children: [
               AppTextField(
                 labelText: 'Title',
-                controller: con.task.value,
-                validation: con.taskValidation.value,
-                errorMessage: con.taskError.value,
+                controller: con.title.value,
+                validation: con.titleValidation.value,
+                errorMessage: con.titleError.value,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
                 onChanged: (value) {
-                  con.taskValidation.value = true;
+                  con.titleValidation.value = true;
                   con.checkDisableButton();
                 },
               ),
               (defaultPadding / 2).verticalSpace,
               AppTextField(
                 labelText: 'Sub Title',
-                controller: con.subTask.value,
-                validation: con.subTaskValidation.value,
-                errorMessage: con.subTaskError.value,
+                controller: con.description.value,
+                validation: con.descriptionValidation.value,
+                errorMessage: con.descriptionError.value,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
                 onChanged: (value) {
-                  con.subTaskValidation.value = true;
+                  con.descriptionValidation.value = true;
                   con.checkDisableButton();
                 },
               ),
@@ -59,12 +64,33 @@ class AddDataScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        height: 130,
+        height: 140,
         child: Column(
           children: [
             AppButton(
-              onPressed: () {
+              onPressed: () async {
                 if (con.validation()) {
+                  FocusScope.of(context).unfocus();
+
+                  /// CREATE LOCATION API
+                  await HomeRepository.createTodoApi(
+                    isLoader: con.isLoading,
+                    title: con.title.value.text,
+                    description: con.description.value.text,
+                    isCompleted: false,
+                    onSuccess: () async {
+                      // await HomeRepository.getTodoList(isLoader: con.isLoading);
+                      final HomeController homeController = Get.find<HomeController>();
+                      homeController.todoList.add(
+                        GetTodoModel(
+                          title: con.title.value.text,
+                          description: con.description.value.text,
+                          isCompleted: false,
+                        ),
+                      );
+                      printTitle(homeController.todoList);
+                    },
+                  );
                   con.clearData();
                   Get.back();
                 }

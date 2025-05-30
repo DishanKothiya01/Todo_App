@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/utils/color_print.dart';
 import 'package:todo_app/utils/ui_utils.dart';
+enum AppFlowType { normal, onboard }
 
 
 

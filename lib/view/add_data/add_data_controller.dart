@@ -2,40 +2,42 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class AddDataController extends GetxController {
-  Rx<TextEditingController> task = TextEditingController().obs;
-  RxBool taskValidation = true.obs;
-  RxString taskError = "".obs;
+  RxBool isLoading = false.obs;
 
-  Rx<TextEditingController> subTask = TextEditingController().obs;
-  RxBool subTaskValidation = true.obs;
-  RxString subTaskError = "".obs;
+  Rx<TextEditingController> title = TextEditingController().obs;
+  RxBool titleValidation = true.obs;
+  RxString titleError = "".obs;
+
+  Rx<TextEditingController> description = TextEditingController().obs;
+  RxBool descriptionValidation = true.obs;
+  RxString descriptionError = "".obs;
 
   bool validation() {
-    if (task.value.text.trim().isEmpty) {
-      taskError.value = "Please enter Task";
-      taskValidation.value = false;
+    if (title.value.text.trim().isEmpty) {
+      titleError.value = "Please enter Task";
+      titleValidation.value = false;
     } else {
-      taskValidation.value = true;
+      titleValidation.value = true;
     }
 
-    if (subTask.value.text.trim().isEmpty) {
-      subTaskError.value = "Please enter SubTask";
-      subTaskValidation.value = false;
+    if (description.value.text.trim().isEmpty) {
+      descriptionError.value = "Please enter SubTask";
+      descriptionValidation.value = false;
     } else {
-      subTaskValidation.value = true;
+      descriptionValidation.value = true;
     }
 
 
 
-    return subTaskValidation.isTrue && taskValidation.isTrue;
+    return descriptionValidation.isTrue && titleValidation.isTrue;
   }
 
   void checkDisableButton() {
-    subTask.value.text.trim().isNotEmpty && task.value.text.trim().isNotEmpty ;
+    description.value.text.trim().isNotEmpty && title.value.text.trim().isNotEmpty ;
   }
 
   void clearData() {
-    subTask.value.clear();
-    task.value.clear();
+    description.value.clear();
+    title.value.clear();
   }
 }
