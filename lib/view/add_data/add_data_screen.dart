@@ -24,81 +24,93 @@ class AddDataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.gradientEnd.withAlpha(50),
         title: Text(
           'ADD DATA',
-          style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundDark),
+          style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundDark).copyWith(fontFamily: 'Bodoni'),
         ),
       ),
-      body: Obx(
-        () => Padding(
-          padding: const EdgeInsets.all(defaultRadius),
-          child: Column(
-            children: [
-              AppTextField(
-                labelText: 'Title',
-                controller: con.title.value,
-                validation: con.titleValidation.value,
-                errorMessage: con.titleError.value,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                onChanged: (value) {
-                  con.titleValidation.value = true;
-                  con.checkDisableButton();
-                },
-              ),
-              (defaultPadding / 2).verticalSpace,
-              AppTextField(
-                labelText: 'Sub Title',
-                controller: con.description.value,
-                validation: con.descriptionValidation.value,
-                errorMessage: con.descriptionError.value,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                onChanged: (value) {
-                  con.descriptionValidation.value = true;
-                  con.checkDisableButton();
-                },
-              ),
-            ],
+      body: Container(
+        color: AppColors.gradientEnd.withAlpha(50),
+        child: Obx(
+          () => Padding(
+            padding: const EdgeInsets.all(defaultRadius),
+            child: Column(
+              children: [
+                AppTextField(
+                  labelText: 'Title',
+                  controller: con.title.value,
+                  validation: con.titleValidation.value,
+                  errorMessage: con.titleError.value,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.name,
+                  onChanged: (value) {
+                    con.titleValidation.value = true;
+                    con.checkDisableButton();
+                  },
+                ),
+                (defaultPadding / 2).verticalSpace,
+                AppTextField(
+                  labelText: 'Sub Title',
+                  controller: con.description.value,
+                  validation: con.descriptionValidation.value,
+                  errorMessage: con.descriptionError.value,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.name,
+                  onChanged: (value) {
+                    con.descriptionValidation.value = true;
+                    con.checkDisableButton();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
       bottomNavigationBar: BottomAppBar(
+        color: AppColors.gradientEnd.withAlpha(50),
         height: 140,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AppButton(
-              onPressed: () async {
-                if (con.validation()) {
-                  FocusScope.of(context).unfocus();
+            con.isLoading.value
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : AppButton(
+                    onPressed: () async {
+                      if (con.validation()) {
+                        FocusScope.of(context).unfocus();
+                        con.isLoading.value = true;
 
-                  /// CREATE LOCATION API
-                  await HomeRepository.createTodoApi(
-                    isLoader: con.isLoading,
-                    title: con.title.value.text,
-                    description: con.description.value.text,
-                    isCompleted: false,
-                    onSuccess: () async {
-                      // await HomeRepository.getTodoList(isLoader: con.isLoading);
-                      final HomeController homeController = Get.find<HomeController>();
-                      homeController.todoList.add(
-                        GetTodoModel(
+                        /// CREATE LOCATION API
+                        await HomeRepository.createTodoApi(
+                          isLoader: con.isLoading,
                           title: con.title.value.text,
                           description: con.description.value.text,
                           isCompleted: false,
-                        ),
-                      );
-                      printTitle(homeController.todoList);
+                          onSuccess: () async {
+                            final HomeController homeController = Get.find<HomeController>();
+                            homeController.todoList.add(
+                              GetTodoModel(
+                                title: con.title.value.text,
+                                description: con.description.value.text,
+                                isCompleted: false,
+                              ),
+                            );
+                            printTitle(homeController.todoList);
+                          },
+                        );
+                        con.clearData();
+                        Get.back();
+                      }
                     },
-                  );
-                  con.clearData();
-                  Get.back();
-                }
-              },
-              title: 'Save',
-              backgroundColor: AppColors.kPrimaryColor,
-              titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight),
-            ),
+                    title: 'Save',
+                    backgroundColor: AppColors.kPrimaryColor,
+                    titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
+                          fontFamily: 'Bodoni',
+                        ),
+                  ),
             (defaultPadding / 2).verticalSpace,
             AppButton(
               onPressed: () {
@@ -106,7 +118,9 @@ class AddDataScreen extends StatelessWidget {
               },
               title: 'Cancel',
               backgroundColor: AppColors.redColor,
-              titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight),
+              titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
+                    fontFamily: 'Bodoni',
+                  ),
             ),
           ],
         ),
