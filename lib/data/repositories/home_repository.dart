@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/view/home/home_controller.dart';
 import '../../utils/color_print.dart';
@@ -18,29 +17,41 @@ class HomeRepository {
     bool isInitial = true,
     bool backgroundMode = false,
   }) async {
-    if (await getConnectivityResult(isLoader: isLoader)) {
-      try {
-        if (!backgroundMode) {
-          isLoader?.value = true;
-        }
-        return await APIFunction.getApiCall(
-          apiName: ApiUrls.getTodoList,
-        ).then(
-          (response) async {
-            if (response != null) {
-              List tempList = response;
-              if (isRegistered<HomeController>()) {
-                final HomeController con = Get.find<HomeController>();
+    if (isRegistered<HomeController>()) {
+      final HomeController con = Get.find<HomeController>();
+      if (await getConnectivityResult(isLoader: isLoader)) {
+        try {
+          if (!backgroundMode) {
+            isLoader?.value = true;
+          }
+          if (isInitial) {
+            if (!backgroundMode) {
+              con.todoList.clear();
+            }
+            con.page.value = 1;
+            con.nextPageAvailable.value = true;
+          }
+          return await APIFunction.getApiCall(
+            apiName: ApiUrls.getTodoList,
+          ).then(
+            (response) async {
+              if (response != null) {
+                List tempList = response;
+
                 con.todoList.value = tempList.map((e) => GetTodoModel.fromJson(e)).toList();
+
+                con.page.value++;
+                // con.nextPageAvailable.value = model.data?.page != model.data?.totalPages;
+
                 isLoader?.value = false;
               }
               isLoader?.value = false;
-            }
-          },
-        );
-      } catch (e) {
-        isLoader?.value = false;
-        printErrors(type: "getUserList", errText: e);
+            },
+          );
+        } catch (e) {
+          isLoader?.value = false;
+          printErrors(type: "getUserList", errText: e);
+        }
       }
     }
   }

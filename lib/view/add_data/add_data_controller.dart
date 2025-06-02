@@ -32,6 +32,13 @@ class AddDataController extends GetxController {
         index = Get.arguments['index'];
       }
     }
+    _initializeFields();
+  }
+  void _initializeFields() {
+    title.value.text = todoModel.title ?? '';
+    description.value.text = todoModel.description ?? '';
+    todoId.value = todoModel.id ?? '';
+    isCompleted.value = todoModel.isCompleted ?? false;
   }
 
   bool validation() {

@@ -65,140 +65,153 @@ class HomeScreen extends StatelessWidget {
             child: con.isLoading.isFalse
                 ? con.todoList.isNotEmpty
                     ? SafeArea(
-                        child: ListView.builder(
-                          itemCount: con.todoList.length,
-                          padding: EdgeInsets.all(defaultPadding / 2),
-                          itemBuilder: (context, index) {
-                            final data = con.todoList[index];
-                            return Container(
-                              margin: EdgeInsets.all(defaultPadding / 2),
-                              padding: EdgeInsets.all(defaultPadding),
-                              decoration: BoxDecoration(
-                                color: AppColors.backgroundLight,
-                                border: Border.all(
-                                  width: 2,
-                                  color: AppColors.textFieldBorder,
-                                ),
-                                borderRadius: BorderRadius.circular(defaultRadius * 2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black38,
-                                    blurRadius: 5,
-                                    offset: Offset(5, 5),
+                        child: ListView(
+                          controller: con.scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: con.todoList.length,
+                              padding: EdgeInsets.all(defaultPadding / 2),
+                              itemBuilder: (context, index) {
+                                final data = con.todoList[index];
+                                return Container(
+                                  margin: EdgeInsets.all(defaultPadding / 2),
+                                  padding: EdgeInsets.all(defaultPadding),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.backgroundLight,
+                                    border: Border.all(
+                                      width: 2,
+                                      color: AppColors.textFieldBorder,
+                                    ),
+                                    borderRadius: BorderRadius.circular(defaultRadius * 2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black38,
+                                        blurRadius: 5,
+                                        offset: Offset(5, 5),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(defaultPadding / 3),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () async {
-                                        // final updatedValue = !(data.isCompleted ?? false);
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(defaultPadding / 3),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () async {
+                                            // final updatedValue = !(data.isCompleted ?? false);
 
-                                        final updatedValue = !(data.isCompleted ?? false);
+                                            final updatedValue = !(data.isCompleted ?? false);
 
-                                        await HomeRepository.upDateTodoApi(
-                                          isLoader: con.isLoading,
-                                          title: data.title ?? '',
-                                          description: data.description ?? '',
-                                          isCompleted: updatedValue,
-                                          todoId: data.id ?? '',
-                                          onSuccess: () {
-                                            con.todoList.value = con.todoList.map((item) {
-                                              if (item.id == data.id) {
-                                                return GetTodoModel(
-                                                  id: item.id,
-                                                  title: item.title,
-                                                  description: item.description,
-                                                  isCompleted: updatedValue,
-                                                );
-                                              }
-                                              return item;
-                                            }).toList();
+                                            await HomeRepository.upDateTodoApi(
+                                              isLoader: con.isLoading,
+                                              title: data.title ?? '',
+                                              description: data.description ?? '',
+                                              isCompleted: updatedValue,
+                                              todoId: data.id ?? '',
+                                              onSuccess: () {
+                                                con.todoList.value = con.todoList.map((item) {
+                                                  if (item.id == data.id) {
+                                                    return GetTodoModel(
+                                                      id: item.id,
+                                                      title: item.title,
+                                                      description: item.description,
+                                                      isCompleted: updatedValue,
+                                                    );
+                                                  }
+                                                  return item;
+                                                }).toList();
+                                              },
+                                            );
                                           },
-                                        );
-                                      },
-                                      child: CircleAvatar(
-                                        child: data.isCompleted == true
-                                            ? Icon(
-                                                Icons.check_circle_outline,
-                                                size: 25,
-                                              )
-                                            : Icon(
-                                                Icons.circle_outlined,
-                                                size: 25,
-                                              ),
-                                      ),
-                                    ),
-                                    (defaultPadding / 2).horizontalSpace,
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '${data.title}',
-                                            style: AppTextStyle.titleStyle(context)?.copyWith(
-                                              color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.backgroundDark,
-                                              fontSize: 18.sp,
-                                              fontFamily: 'Bodoni',
-                                              // decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
-                                            ),
-                                            maxLines: 1,
+                                          child: CircleAvatar(
+                                            child: data.isCompleted == true
+                                                ? Icon(
+                                                    Icons.check_circle_outline,
+                                                    size: 25,
+                                                  )
+                                                : Icon(
+                                                    Icons.circle_outlined,
+                                                    size: 25,
+                                                  ),
                                           ),
-                                          Text(
-                                            '${data.description}',
-                                            style: AppTextStyle.subtitleStyle(context)?.copyWith(
-                                              color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.textGreyDark,
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w500,
-                                              decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
+                                        ),
+                                        (defaultPadding / 2).horizontalSpace,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${data.title}',
+                                                style: AppTextStyle.titleStyle(context)?.copyWith(
+                                                  color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.backgroundDark,
+                                                  fontSize: 18.sp,
+                                                  fontFamily: 'Bodoni',
+                                                  // decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
+                                                ),
+                                                maxLines: 1,
+                                              ),
+                                              Text(
+                                                '${data.description}',
+                                                style: AppTextStyle.subtitleStyle(context)?.copyWith(
+                                                  color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.textGreyDark,
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                  decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Get.toNamed(AppRoutes.addDataScreen, arguments: {
+                                              'todoModel': data,
+                                              'index': index,
+                                            });
+                                          },
+                                          child: CircleAvatar(
+                                            backgroundColor: AppColors.secondaryColor.withAlpha(60),
+                                            child: Image.asset(
+                                              AppAssets.editIcon,
+                                              height: 20,
+                                              width: 20,
                                             ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.toNamed(AppRoutes.addDataScreen, arguments: {
-                                          'todoModel': data,
-                                          'index': index,
-                                        });
-                                      },
-                                      child: CircleAvatar(
-                                        backgroundColor: AppColors.secondaryColor.withAlpha(60),
-                                        child: Image.asset(
-                                          AppAssets.editIcon,
-                                          height: 20,
-                                          width: 20,
+                                          ),
                                         ),
-                                      ),
+                                        (defaultPadding / 2).horizontalSpace,
+                                        GestureDetector(
+                                          onTap: () async {
+                                            if (!isValEmpty(data.id)) {
+                                              await HomeRepository.deleteTodoDataApi(isLoader: con.isLoading, todoId: data.id!, onSuccess: () {});
+                                            } else {
+                                              printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
+                                            }
+                                          },
+                                          child: CircleAvatar(
+                                            backgroundColor: AppColors.redColor.withAlpha(60),
+                                            child: Image.asset(
+                                              AppAssets.deleteIcon,
+                                              height: 20,
+                                              width: 20,
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    (defaultPadding / 2).horizontalSpace,
-                                    GestureDetector(
-                                      onTap: () async {
-                                        if (!isValEmpty(data.id)) {
-                                          await HomeRepository.deleteTodoDataApi(isLoader: con.isLoading, todoId: data.id!, onSuccess: () {});
-                                        } else {
-                                          printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
-                                        }
-                                      },
-                                      child: CircleAvatar(
-                                        backgroundColor: AppColors.redColor.withAlpha(60),
-                                        child: Image.asset(
-                                          AppAssets.deleteIcon,
-                                          height: 20,
-                                          width: 20,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  ),
+                                );
+                              },
+                            ),
+                            if (con.paginationLoading.isTrue)
+                              Center(
+                                child: CircularProgressIndicator(),
                               ),
-                            );
-                          },
+                          ],
                         ),
                       )
                     : Center(child: Text('Data Not Found'))

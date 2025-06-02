@@ -17,23 +17,20 @@ class HomeController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    // HomeRepository.getTodoList(isLoader: isLoading);
-
-    fetchData();
-  }
-
-  void fetchData() async {
     HomeRepository.getTodoList(isLoader: isLoading);
 
-    // scrollController.addListener(
-    //       () async {
-    //     if (scrollController.position.maxScrollExtent == scrollController.position.pixels) {
-    //       if (nextPageAvailable.isTrue && paginationLoading.isFalse) {
-    //         await HomeRepository.getTodoList(isLoader: paginationLoading,isInitial: false);
-    //         // await OrderHistoryRepository.getOrderHistoryAPI(isLoader: paginationLoading, isInitial: false);
-    //       }
-    //     }
-    //   },
-    // );
+    manageScrollController();
+  }
+
+  void manageScrollController() async {
+    scrollController.addListener(
+          () async {
+        if (scrollController.position.maxScrollExtent == scrollController.position.pixels) {
+          if (nextPageAvailable.isTrue && paginationLoading.isFalse) {
+            await HomeRepository.getTodoList(isLoader: paginationLoading,isInitial: false);
+          }
+        }
+      },
+    );
   }
 }
