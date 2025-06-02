@@ -20,6 +20,7 @@ class AddDataController extends GetxController {
   /// Argument Variable
   GetTodoModel todoModel = GetTodoModel();
   int index = 0;
+  bool isEdit = false;
 
   @override
   void onInit() {
@@ -30,6 +31,9 @@ class AddDataController extends GetxController {
       }
       if (Get.arguments['index'].runtimeType == int) {
         index = Get.arguments['index'];
+      }
+      if (Get.arguments['isEdit'].runtimeType == bool) {
+        isEdit = Get.arguments['isEdit'];
       }
     }
     _initializeFields();

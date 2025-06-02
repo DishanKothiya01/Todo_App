@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:todo_app/utils/local_storage.dart';
 import 'package:todo_app/view/home/home_controller.dart';
 import '../../utils/color_print.dart';
 import '../../utils/utils.dart';
@@ -52,6 +53,8 @@ class HomeRepository {
           isLoader?.value = false;
           printErrors(type: "getUserList", errText: e);
         }
+      } else {
+        con.todoList.value = LocalStorage.loadPendingTodoList();
       }
     }
   }
@@ -89,6 +92,26 @@ class HomeRepository {
       } catch (e) {
         isLoader?.value = false;
         printErrors(type: "createTODO Data Function", errText: e);
+      }
+    } else {
+      if (isRegistered<HomeController>()) {
+        final HomeController homeController = Get.find<HomeController>();
+        LocalStorage.savePendingTodo(
+          GetTodoModel(
+            title: title,
+            description: description,
+            isCompleted: isCompleted,
+          ),
+        );
+        homeController.todoList.add(
+          GetTodoModel(
+            id: (homeController.todoList.length + 1).toString(),
+            title: title,
+            description: description,
+            isCompleted: isCompleted,
+          ),
+        );
+        Get.back();
       }
     }
   }
@@ -128,6 +151,24 @@ class HomeRepository {
         isLoader?.value = false;
         printErrors(type: "UpdateTODO Data Function", errText: e);
       }
+    } else {
+      if (isRegistered<HomeController>()) {
+        final HomeController homeController = Get.find<HomeController>();
+        int index = homeController.todoList.indexWhere((e) => e.id == todoId);
+        if (index != -1) {
+          final updatedTodo = GetTodoModel(
+            id: todoId,
+            title: title,
+            description: description,
+            isCompleted: isCompleted,
+          );
+
+          homeController.todoList[index] = updatedTodo;
+          LocalStorage.updatePendingTodoById(todoId, updatedTodo);
+          onSuccess?.call();
+          isLoader?.value = false;
+        }
+      }
     }
   }
 
@@ -138,7 +179,7 @@ class HomeRepository {
   static Future<dynamic> deleteTodoDataApi({RxBool? isLoader, required String todoId, Function()? onSuccess}) async {
     if (await getConnectivityResult()) {
       try {
-        isLoader?.value = true;
+        // isLoader?.value = true;
 
         return await APIFunction.deleteApiCall(
           apiName: ApiUrls.deleteTodo(id: todoId),
@@ -153,14 +194,25 @@ class HomeRepository {
                 }
               }
 
-              if (onSuccess != null) onSuccess();
-              isLoader?.value = false;
+              // if (onSuccess != null) onSuccess();
+              // isLoader?.value = false;
             }
           },
         );
       } catch (e) {
         isLoader?.value = false;
         printErrors(type: "deleteTodoDataApi", errText: e);
+      }
+    } else {
+      if (isRegistered<HomeController>()) {
+        final HomeController con = Get.find<HomeController>();
+        int index = con.todoList.indexWhere((e) => e.id == todoId);
+        if (index != -1) {
+          con.todoList.removeAt(index);
+          LocalStorage.deletePendingTodoById(todoId);
+          onSuccess?.call();
+          isLoader?.value = false;
+        }
       }
     }
   }

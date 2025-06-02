@@ -10,6 +10,7 @@ import 'package:todo_app/view/home/home_controller.dart';
 import '../../data/model/get_todo_model.dart';
 import '../../res/app_colors.dart';
 import '../../utils/color_print.dart';
+import '../../utils/local_storage.dart';
 import '../../utils/routs/app_routs.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -20,12 +21,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.toNamed(AppRoutes.addDataScreen);
-        },
-        child: Icon(Icons.add),
-      ),
+
       appBar: AppBar(
           backgroundColor: AppColors.gradientEnd.withAlpha(50),
           centerTitle: true,
@@ -41,17 +37,20 @@ class HomeScreen extends StatelessWidget {
                   fontFamily: 'Bodoni',
                 ),
               ),
-              Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(image: AssetImage(AppAssets.avtarImage)),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0XFF2193b0),
-                      Color(0XFF6dd5ed),
-                    ],
+              GestureDetector(
+                onTap: () => LocalStorage.clearPendingTodos(),
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(image: AssetImage(AppAssets.avtarImage)),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0XFF2193b0),
+                        Color(0XFF6dd5ed),
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -151,7 +150,6 @@ class HomeScreen extends StatelessWidget {
                                                   color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.backgroundDark,
                                                   fontSize: 18.sp,
                                                   fontFamily: 'Bodoni',
-                                                  // decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
                                                 ),
                                                 maxLines: 1,
                                               ),
@@ -172,6 +170,7 @@ class HomeScreen extends StatelessWidget {
                                             Get.toNamed(AppRoutes.addDataScreen, arguments: {
                                               'todoModel': data,
                                               'index': index,
+                                              'isEdit': true
                                             });
                                           },
                                           child: CircleAvatar(
@@ -186,11 +185,11 @@ class HomeScreen extends StatelessWidget {
                                         (defaultPadding / 2).horizontalSpace,
                                         GestureDetector(
                                           onTap: () async {
-                                            if (!isValEmpty(data.id)) {
-                                              await HomeRepository.deleteTodoDataApi(isLoader: con.isLoading, todoId: data.id!, onSuccess: () {});
-                                            } else {
-                                              printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
-                                            }
+                                            // if (!isValEmpty(data.id)) {
+                                              await HomeRepository.deleteTodoDataApi( todoId: data.id ?? "",);
+                                            // } else {
+                                            //   printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
+                                            // }
                                           },
                                           child: CircleAvatar(
                                             backgroundColor: AppColors.redColor.withAlpha(60),
@@ -218,7 +217,12 @@ class HomeScreen extends StatelessWidget {
                 : Center(child: CircularProgressIndicator()),
           ),
         ),
-      ),
+      ),  floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Get.toNamed(AppRoutes.addDataScreen);
+      },
+      child: Icon(Icons.add),
+    ),
     );
   }
 }

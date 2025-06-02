@@ -23,10 +23,10 @@ class AppEnvironment {
   static String _getBaseURLByEnvironment(EnvironmentType env) {
     switch (env) {
       case EnvironmentType.production:
-        return "https://ppa-api.happypet.care";
+        return "";
 
       case EnvironmentType.staging:
-        return "http://13.126.213.87:7028";
+        return "";
 
       case EnvironmentType.development:
         return "";
