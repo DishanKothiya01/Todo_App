@@ -13,6 +13,7 @@ class HomeController extends GetxController {
   RxBool paginationLoading = false.obs;
   ScrollController scrollController = ScrollController();
   RxList<GetTodoModel> todoList = <GetTodoModel>[].obs;
+  RxString deletingTodoId = ''.obs;
 
   @override
   void onReady() {

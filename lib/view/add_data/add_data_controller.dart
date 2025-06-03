@@ -4,7 +4,7 @@ import 'package:todo_app/data/model/get_todo_model.dart';
 
 class AddDataController extends GetxController {
   RxBool isLoading = false.obs;
-  RxString todoId = ''.obs;
+  String todoId = '';
   RxBool isCompleted = false.obs;
 
   /// Title Validation And Error Handle
@@ -29,10 +29,9 @@ class AddDataController extends GetxController {
       if (Get.arguments['todoModel'].runtimeType == GetTodoModel) {
         todoModel = Get.arguments['todoModel'];
       }
-      if (Get.arguments['index'].runtimeType == int) {
-        index = Get.arguments['index'];
-      }
-      if (Get.arguments['isEdit'].runtimeType == bool) {
+      if (Get.arguments['id'].runtimeType == String) {
+        todoId = Get.arguments['id'];
+      }if (Get.arguments['isEdit'].runtimeType == bool) {
         isEdit = Get.arguments['isEdit'];
       }
     }
@@ -41,8 +40,10 @@ class AddDataController extends GetxController {
   void _initializeFields() {
     title.value.text = todoModel.title ?? '';
     description.value.text = todoModel.description ?? '';
-    todoId.value = todoModel.id ?? '';
     isCompleted.value = todoModel.isCompleted ?? false;
+    if(todoId.isEmpty){
+      todoId = todoModel.id ?? '';
+    }
   }
 
   bool validation() {

@@ -21,7 +21,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
           backgroundColor: AppColors.gradientEnd.withAlpha(50),
           centerTitle: true,
@@ -102,30 +101,25 @@ class HomeScreen extends StatelessWidget {
                                       children: [
                                         GestureDetector(
                                           onTap: () async {
-                                            // final updatedValue = !(data.isCompleted ?? false);
-
                                             final updatedValue = !(data.isCompleted ?? false);
-
-                                            await HomeRepository.upDateTodoApi(
-                                              isLoader: con.isLoading,
-                                              title: data.title ?? '',
-                                              description: data.description ?? '',
+                                            final updatedTodo = GetTodoModel(
+                                              id: data.id,
+                                              title: data.title,
+                                              description: data.description,
                                               isCompleted: updatedValue,
-                                              todoId: data.id ?? '',
-                                              onSuccess: () {
-                                                con.todoList.value = con.todoList.map((item) {
-                                                  if (item.id == data.id) {
-                                                    return GetTodoModel(
-                                                      id: item.id,
-                                                      title: item.title,
-                                                      description: item.description,
-                                                      isCompleted: updatedValue,
-                                                    );
-                                                  }
-                                                  return item;
-                                                }).toList();
-                                              },
                                             );
+
+                                            int index = con.todoList.indexWhere((item) => item.id == data.id);
+
+                                            if (index != -1) {
+                                              con.todoList[index] = updatedTodo;
+                                              HomeRepository.upDateTodoApi(
+                                                title: data.title ?? '',
+                                                description: data.description ?? '',
+                                                isCompleted: updatedValue,
+                                                todoId: data.id.toString() ?? "",
+                                              );
+                                            }
                                           },
                                           child: CircleAvatar(
                                             child: data.isCompleted == true
@@ -169,8 +163,8 @@ class HomeScreen extends StatelessWidget {
                                           onTap: () {
                                             Get.toNamed(AppRoutes.addDataScreen, arguments: {
                                               'todoModel': data,
-                                              'index': index,
-                                              'isEdit': true
+                                              'id': data.id,
+                                              'isEdit': true,
                                             });
                                           },
                                           child: CircleAvatar(
@@ -185,20 +179,30 @@ class HomeScreen extends StatelessWidget {
                                         (defaultPadding / 2).horizontalSpace,
                                         GestureDetector(
                                           onTap: () async {
-                                            // if (!isValEmpty(data.id)) {
-                                              await HomeRepository.deleteTodoDataApi( todoId: data.id ?? "",);
-                                            // } else {
-                                            //   printErrors(type: AppRoutes.homeScreen, errText: "id is deleted ");
-                                            // }
+                                            con.deletingTodoId.value = data.id ?? "";
+
+                                            await HomeRepository.deleteTodoDataApi(
+                                              todoId: data.id ?? "",
+                                            );
+                                            con.deletingTodoId.value = '';
                                           },
-                                          child: CircleAvatar(
-                                            backgroundColor: AppColors.redColor.withAlpha(60),
-                                            child: Image.asset(
-                                              AppAssets.deleteIcon,
-                                              height: 20,
-                                              width: 20,
-                                            ),
-                                          ),
+                                          child: Obx(() {
+                                            final isLoading = con.deletingTodoId.value == data.id;
+                                            return CircleAvatar(
+                                              backgroundColor: AppColors.redColor.withAlpha(60),
+                                              child: isLoading
+                                                  ? SizedBox(
+                                                      height: 20,
+                                                      width: 20,
+                                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                                    )
+                                                  : Image.asset(
+                                                      AppAssets.deleteIcon,
+                                                      height: 20,
+                                                      width: 20,
+                                                    ),
+                                            );
+                                          }),
                                         )
                                       ],
                                     ),
@@ -217,12 +221,13 @@ class HomeScreen extends StatelessWidget {
                 : Center(child: CircularProgressIndicator()),
           ),
         ),
-      ),  floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        Get.toNamed(AppRoutes.addDataScreen);
-      },
-      child: Icon(Icons.add),
-    ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.toNamed(AppRoutes.addDataScreen);
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

@@ -46,13 +46,22 @@ import '../data/model/get_todo_model.dart';
 //   }
 // }
 
-
 class LocalStorage {
   static const String todoListKey = "TODO_LIST";
   static const String pendingTodoKey = "PENDING_TODO_LIST";
+  static const String _todoIdCounterKey = 'todo_id_counter';
+
   static RxString accessToken = "".obs;
 
   static final prefs = GetStorage();
+
+  /// Generate unique persistent local todo ID
+  static String generateLocalTodoId() {
+    final int currentId = prefs.read(_todoIdCounterKey) ?? 0;
+    final int newId = currentId + 1;
+    prefs.write(_todoIdCounterKey, newId);
+    return 'local_$newId';
+  }
 
   /// Save new offline todo
   static void savePendingTodo(GetTodoModel todo) {
@@ -68,7 +77,7 @@ class LocalStorage {
     return jsonList.map((e) => GetTodoModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
-  /// ✅ Update specific offline todo by ID
+  ///  Update specific offline todo by ID
   static void updatePendingTodoById(String id, GetTodoModel updatedTodo) {
     List<GetTodoModel> pendingList = loadPendingTodoList();
     int index = pendingList.indexWhere((todo) => todo.id == id);
@@ -78,11 +87,28 @@ class LocalStorage {
     }
   }
 
-  /// ✅ Delete specific offline todo by ID
+  ///  Delete specific offline todo by ID
   static void deletePendingTodoById(String id) {
     List<GetTodoModel> pendingList = loadPendingTodoList();
     pendingList.removeWhere((todo) => todo.id == id);
     prefs.write(pendingTodoKey, pendingList.map((e) => e.toJson()).toList());
+  }
+
+  static void toggleIsCompletedById(String id) {
+    List<GetTodoModel> pendingList = loadPendingTodoList();
+
+    int index = pendingList.indexWhere((todo) => todo.id == id);
+    if (index != -1) {
+      final todo = pendingList[index];
+      pendingList[index] = GetTodoModel(
+        id: todo.id,
+        title: todo.title,
+        description: todo.description,
+        isCompleted: !(todo.isCompleted ?? false),
+      );
+
+      prefs.write(pendingTodoKey, pendingList.map((e) => e.toJson()).toList());
+    }
   }
 
   /// Clear all offline todos

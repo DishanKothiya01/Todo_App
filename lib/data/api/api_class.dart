@@ -9,7 +9,6 @@ import 'package:todo_app/data/handler/api_url.dart';
 import 'package:todo_app/utils/color_print.dart';
 import 'package:todo_app/utils/ui_utils.dart';
 import 'package:todo_app/utils/utils.dart';
-import '../repositories/bottom_sheet_repository.dart';
 import '../services/notification/notification_enum.dart';
 
 class HttpUtil {
@@ -80,7 +79,7 @@ class HttpUtil {
       if (showErrorToast) {
         final subMessage = e.response?.data?['subMessage'] ?? "";
         if (subMessage != "route_not_found") {
-          UiUtils.toast(e.response?.data['message'].toString());
+          // UiUtils.toast(e.response?.data['message'].toString());
         }
       }
     }
@@ -186,7 +185,7 @@ class HttpUtil {
 
     if (sheetType != null) {
       if (responseData["bottomSheetAvailable"] != null && responseData["bottomSheetAvailable"] == true) {
-        BottomSheetRepository.getBottomSheetDetailsAPI(typeOfSelectionSlug: sheetType);
+        // BottomSheetRepository.getBottomSheetDetailsAPI(typeOfSelectionSlug: sheetType);
       }
     }
     return responseData;

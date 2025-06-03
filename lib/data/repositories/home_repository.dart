@@ -67,7 +67,7 @@ class HomeRepository {
     required String title,
     required String description,
     required bool isCompleted,
-    Function()? onSuccess,
+    Function(String newId)? onSuccess,
   }) async {
     if (await getConnectivityResult(isLoader: isLoader)) {
       try {
@@ -82,8 +82,10 @@ class HomeRepository {
           },
         ).then(
           (response) {
-            if (response != null) {
-              onSuccess?.call();
+            if (response != null && response['id'] != null) {
+              final String newId = response['id'].toString();
+
+              onSuccess?.call(newId);
               isLoader?.value = false;
             }
             isLoader?.value = false;
@@ -96,8 +98,10 @@ class HomeRepository {
     } else {
       if (isRegistered<HomeController>()) {
         final HomeController homeController = Get.find<HomeController>();
+
         LocalStorage.savePendingTodo(
           GetTodoModel(
+            id: (homeController.todoList.length).toString(),
             title: title,
             description: description,
             isCompleted: isCompleted,
@@ -105,7 +109,7 @@ class HomeRepository {
         );
         homeController.todoList.add(
           GetTodoModel(
-            id: (homeController.todoList.length + 1).toString(),
+            id: (homeController.todoList.length).toString(),
             title: title,
             description: description,
             isCompleted: isCompleted,
@@ -130,14 +134,15 @@ class HomeRepository {
     if (await getConnectivityResult(isLoader: isLoader)) {
       try {
         isLoader?.value = true;
+        Map<String, Object> body = {
+          "title": title,
+          "description": description,
+          "isCompleted": isCompleted,
+        };
 
         return await APIFunction.putApiCall(
           apiName: ApiUrls.updateTodo(id: todoId),
-          body: {
-            "title": title,
-            "description": description,
-            "isCompleted": isCompleted,
-          },
+          body: body,
         ).then(
           (response) {
             if (response != null) {
