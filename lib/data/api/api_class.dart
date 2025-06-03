@@ -121,7 +121,7 @@ class HttpUtil {
         final message = _getErrorMessage(statusCode);
         return ErrorEntity(code: statusCode, message: message);
       case DioExceptionType.unknown:
-        return _handleUnknownError(error.message);
+        // return _handleUnknownError(error.message);
       default:
         return ErrorEntity(code: -8, message: "Unknown error occurred");
     }
@@ -144,12 +144,12 @@ class HttpUtil {
     }
   }
 
-  ErrorEntity _handleUnknownError(String? message) {
-    if (message?.contains("SocketException") ?? false) {
-      return ErrorEntity(code: -5, message: "Internet is unavailable. Please try again.");
-    }
-    return ErrorEntity(code: -7, message: "Something went wrong");
-  }
+  // ErrorEntity _handleUnknownError(String? message) {
+  //   if (message?.contains("SocketException") ?? false) {
+  //     return ErrorEntity(code: -5, message: "Internet is unavailable. Please try again.");
+  //   }
+  //   return ErrorEntity(code: -7, message: "Something went wrong");
+  // }
 
   Future<dynamic> _makeRequest(
     String path, {
