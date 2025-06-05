@@ -27,7 +27,12 @@ bool isRegistered<S>({RxBool? isLoader}) {
     return false;
   }
 }
-
+extension ColorExtension on Color {
+  Color withCtmOpacity(double opacity) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    return withAlpha((255.0 * opacity).round());
+  }
+}
 bool isValEmpty(dynamic val) {
   String? value = val.toString();
   return (val == null || value.isEmpty || value == "null" || value == "" || value == "NULL");
@@ -55,5 +60,6 @@ Future<bool> getConnectivityResult({bool showToast = true, RxBool? isLoader}) as
     isLoader?.value = false;
     return false;
   }
+
 }
 

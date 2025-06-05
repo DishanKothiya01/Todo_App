@@ -34,4 +34,19 @@ class HomeController extends GetxController {
       },
     );
   }
+  RxSet<String> selectedTodoIds = <String>{}.obs;
+
+  bool isTodoSelected(String? id) => selectedTodoIds.contains(id);
+
+  void toggleSelection(String id) {
+    if (selectedTodoIds.contains(id)) {
+      selectedTodoIds.remove(id);
+    } else {
+      selectedTodoIds.add(id);
+    }
+  }
+
+  void clearSelection() {
+    selectedTodoIds.clear();
+  }
 }

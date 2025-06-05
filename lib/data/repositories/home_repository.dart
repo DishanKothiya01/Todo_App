@@ -196,6 +196,8 @@ class HomeRepository {
                 int index = con.todoList.indexWhere((e) => e.id == todoId);
                 if (index != -1) {
                   con.todoList.removeAt(index);
+                  LocalStorage.deletePendingTodoById(todoId);
+
                 }
               }
 

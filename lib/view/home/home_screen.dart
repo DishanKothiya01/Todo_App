@@ -5,11 +5,13 @@ import 'package:todo_app/data/repositories/home_repository.dart';
 import 'package:todo_app/res/pull_to_refresh_indicator.dart';
 import 'package:todo_app/utils/appAssets.dart';
 import 'package:todo_app/utils/app_text_style.dart';
+import 'package:todo_app/utils/local_storage.dart';
+import 'package:todo_app/utils/ui_utils.dart';
 import 'package:todo_app/utils/utils.dart';
+import 'package:todo_app/view/home/components/home_shimmer.dart';
 import 'package:todo_app/view/home/home_controller.dart';
 import '../../data/model/get_todo_model.dart';
 import '../../res/app_colors.dart';
-import '../../utils/local_storage.dart';
 import '../../utils/routs/app_routs.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -21,7 +23,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: AppColors.gradientEnd.withAlpha(50),
+          backgroundColor: AppColors.backgroundLight,
+          surfaceTintColor: AppColors.backgroundLight,
+          elevation: 0,
           centerTitle: true,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -32,21 +36,22 @@ class HomeScreen extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: 25,
                   color: AppColors.backgroundDark,
-                  fontFamily: 'Bodoni',
+                  fontFamily: 'Inter-Bold',
                 ),
               ),
               GestureDetector(
                 onTap: () {
-                  LocalStorage.clearPendingTodos();
-                  if (Get.isRegistered<HomeController>()) {
-                    final controller = Get.find<HomeController>();
-                    controller.todoList.clear();
-                  }
+                  // LocalStorage.clearPendingTodos();
+                  // if (Get.isRegistered<HomeController>()) {
+                  //   final controller = Get.find<HomeController>();
+                  //   controller.todoList.clear();
+                  // }
                 },
                 child: Container(
-                  height: 50,
-                  width: 50,
+                  height: 40,
+                  width: 40,
                   decoration: BoxDecoration(
+                    color: AppColors.gradientEnd.withAlpha(50),
                     shape: BoxShape.circle,
                     image: DecorationImage(image: AssetImage(AppAssets.avtarImage)),
                     gradient: LinearGradient(
@@ -61,13 +66,16 @@ class HomeScreen extends StatelessWidget {
             ],
           )),
       body: Container(
-        color: AppColors.gradientEnd.withAlpha(50),
+        color: AppColors.backgroundLight,
         child: Obx(
-          () => con.isLoading.isFalse
-              ? con.todoList.isNotEmpty
-                  ? PullToRefreshIndicator(
-                      onRefresh: () async => await HomeRepository.getTodoList(isLoader: con.isLoading),
-                      child: ListView(
+          () => PullToRefreshIndicator(
+            onRefresh: () async => await HomeRepository.getTodoList(
+              isLoader: con.isLoading,
+            ),
+            indicatorColor: AppColors.gradientEnd,
+            child: con.isLoading.isFalse
+                ? con.todoList.isNotEmpty
+                    ? ListView(
                         controller: con.scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: EdgeInsets.zero,
@@ -81,27 +89,20 @@ class HomeScreen extends StatelessWidget {
                               final data = con.todoList[index];
                               return Container(
                                 margin: EdgeInsets.all(defaultPadding / 2),
-                                padding: EdgeInsets.all(defaultPadding),
+                                padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2, vertical: defaultPadding / 2).copyWith(right: defaultPadding / 1.5),
                                 decoration: BoxDecoration(
-                                  color: AppColors.backgroundLight,
+                                  color: data.isCompleted == true ? AppColors.backgroundDark.withAlpha(20) : AppColors.gradientEnd.withAlpha(50),
                                   border: Border.all(
                                     width: 2,
-                                    color: AppColors.textFieldBorder,
+                                    color: data.isCompleted == true ? AppColors.backgroundDark : AppColors.gradientEnd,
                                   ),
                                   borderRadius: BorderRadius.circular(defaultRadius * 2),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black38,
-                                      blurRadius: 5,
-                                      offset: Offset(5, 5),
-                                    ),
-                                  ],
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(defaultPadding / 3),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       GestureDetector(
                                         onTap: () async {
@@ -117,15 +118,18 @@ class HomeScreen extends StatelessWidget {
 
                                           if (index != -1) {
                                             con.todoList[index] = updatedTodo;
+                                            LocalStorage.toggleIsCompletedById(data.id ?? '');
                                             HomeRepository.upDateTodoApi(
                                               title: data.title ?? '',
                                               description: data.description ?? '',
                                               isCompleted: updatedValue,
                                               todoId: data.id.toString() ?? "",
                                             );
+                                            UiUtils.showSuccess("Task is ${data.isCompleted == true ? 'UnCompleted ' : 'Completed'}", "${data.title} is ${data.isCompleted == true ? 'UnCompleted' : 'Completed'}");
                                           }
                                         },
-                                        child: CircleAvatar(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(top: defaultPadding / 5),
                                           child: data.isCompleted == true
                                               ? Icon(
                                                   Icons.check_circle_outline,
@@ -143,11 +147,12 @@ class HomeScreen extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '${data.title}',
+                                              '${data.title?.toUpperCase()}',
+                                              overflow: TextOverflow.ellipsis,
                                               style: AppTextStyle.titleStyle(context)?.copyWith(
                                                 color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.backgroundDark,
                                                 fontSize: 18.sp,
-                                                fontFamily: 'Bodoni',
+                                                fontFamily: 'Inter-Bold',
                                               ),
                                               maxLines: 1,
                                             ),
@@ -157,12 +162,14 @@ class HomeScreen extends StatelessWidget {
                                                 color: data.isCompleted == true ? AppColors.textGreyColor : AppColors.textGreyDark,
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w500,
+                                                fontFamily: 'Inter-Medium',
                                                 decoration: data.isCompleted == true ? TextDecoration.lineThrough : null,
                                               ),
                                             )
                                           ],
                                         ),
                                       ),
+                                      (defaultPadding / 2).horizontalSpace,
                                       GestureDetector(
                                         onTap: () {
                                           Get.toNamed(AppRoutes.addDataScreen, arguments: {
@@ -171,42 +178,53 @@ class HomeScreen extends StatelessWidget {
                                             'isEdit': true,
                                           });
                                         },
-                                        child: CircleAvatar(
-                                          backgroundColor: AppColors.secondaryColor.withAlpha(60),
-                                          child: Image.asset(
-                                            AppAssets.editIcon,
-                                            height: 20,
-                                            width: 20,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(top: defaultPadding / 5),
+                                          child: CircleAvatar(
+                                            backgroundColor: data.isCompleted == true ? AppColors.backgroundDark.withAlpha(50) : AppColors.secondaryColor.withAlpha(60),
+                                            child: Image.asset(
+                                              data.isCompleted == true ? AppAssets.visibleIcon : AppAssets.editIcon,
+                                              height: 20,
+                                              width: 20,
+                                            ),
                                           ),
                                         ),
                                       ),
                                       (defaultPadding / 2).horizontalSpace,
-                                      GestureDetector(
-                                        onTap: () async {
-                                          con.deletingTodoId.value = data.id ?? "";
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: defaultPadding / 5),
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            con.deletingTodoId.value = data.id ?? "";
 
-                                          await HomeRepository.deleteTodoDataApi(
-                                            todoId: data.id ?? "",
-                                          );
-                                          con.deletingTodoId.value = '';
-                                        },
-                                        child: Obx(() {
-                                          final isLoading = con.deletingTodoId.value == data.id;
-                                          return CircleAvatar(
-                                            backgroundColor: AppColors.redColor.withAlpha(60),
-                                            child: isLoading
-                                                ? SizedBox(
-                                                    height: 20,
-                                                    width: 20,
-                                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                                  )
-                                                : Image.asset(
-                                                    AppAssets.deleteIcon,
-                                                    height: 20,
-                                                    width: 20,
-                                                  ),
-                                          );
-                                        }),
+                                            await HomeRepository.deleteTodoDataApi(
+                                              todoId: data.id ?? "",
+                                            );
+                                            con.deletingTodoId.value = '';
+                                          },
+                                          child: Obx(() {
+                                            final isLoading = con.deletingTodoId.value == data.id;
+                                            return CircleAvatar(
+                                              backgroundColor: data.isCompleted == true ? AppColors.backgroundDark.withAlpha(50) : AppColors.redColor.withAlpha(60),
+                                              child: isLoading
+                                                  ? Center(
+                                                      child: SizedBox(
+                                                        height: 20,
+                                                        width: 20,
+                                                        child: CircularProgressIndicator(
+                                                          color: AppColors.backgroundDark,
+                                                          strokeWidth: 2,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Image.asset(
+                                                      AppAssets.deleteIcon,
+                                                      height: 20,
+                                                      width: 20,
+                                                    ),
+                                            );
+                                          }),
+                                        ),
                                       )
                                     ],
                                   ),
@@ -214,18 +232,25 @@ class HomeScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          if (con.paginationLoading.isTrue)
-                            Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                          if (con.paginationLoading.isTrue) HomeShimmer(),
                         ],
-                      ),
-                    )
-                  : Center(child: Text('Data Not Found'))
-              : Center(child: CircularProgressIndicator()),
+                      )
+                    : Center(child: Text('Data Not Found'))
+                : Center(
+                    child: ListView.builder(
+                      itemCount: 10,
+                      padding: EdgeInsets.symmetric(horizontal: defaultPadding, vertical: defaultPadding),
+                      itemBuilder: (context, index) {
+                        return HomeShimmer();
+                      },
+                    ),
+                  ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.gradientEnd,
+        foregroundColor: AppColors.backgroundLight,
         onPressed: () {
           Get.toNamed(AppRoutes.addDataScreen);
         },

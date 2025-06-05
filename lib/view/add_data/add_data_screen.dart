@@ -14,6 +14,7 @@ import 'package:todo_app/utils/utils.dart';
 import 'package:todo_app/view/add_data/add_data_controller.dart';
 
 import '../../data/model/get_todo_model.dart';
+import '../../res/app_custom_color.dart';
 import '../../utils/local_storage.dart';
 import '../home/home_controller.dart';
 
@@ -27,16 +28,16 @@ class AddDataScreen extends StatelessWidget {
     return Obx(
       () => Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColors.gradientEnd.withAlpha(50),
+          backgroundColor: AppColors.backgroundLight,
           title: Text(
             con.isEdit == false ? 'ADD DATA' : 'UPDATE DATA',
-            style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundDark).copyWith(fontFamily: 'Bodoni'),
+            style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundDark).copyWith(fontFamily: 'Inter-Bold'),
           ),
         ),
         body: Container(
-          color: AppColors.gradientEnd.withAlpha(50),
+          color: AppColors.backgroundLight,
           child: Padding(
-            padding: const EdgeInsets.all(defaultRadius),
+            padding: const EdgeInsets.symmetric(horizontal: defaultRadius * 2).copyWith(top: defaultPadding / 2),
             child: Column(
               children: [
                 AppTextField(
@@ -46,19 +47,23 @@ class AddDataScreen extends StatelessWidget {
                   errorMessage: con.titleError.value,
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.name,
+                  enabled: con.isCompleted.value ? false : true,
                   onChanged: (value) {
                     con.titleValidation.value = true;
                     con.checkDisableButton();
                   },
                 ),
-                (defaultPadding / 2).verticalSpace,
+                (defaultPadding).verticalSpace,
                 AppTextField(
-                  labelText: 'Sub Title',
+                  labelText: 'Description',
                   controller: con.description.value,
                   validation: con.descriptionValidation.value,
                   errorMessage: con.descriptionError.value,
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.name,
+                  enabled: con.isCompleted.value ? false : true,
+                  minLines: 1,
+                  maxLines: 5,
                   onChanged: (value) {
                     con.descriptionValidation.value = true;
                     con.checkDisableButton();
@@ -69,107 +74,113 @@ class AddDataScreen extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: BottomAppBar(
-          color: AppColors.gradientEnd.withAlpha(50),
-          height: 140,
+          color: AppColors.backgroundLight,
+          height: 140.h,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              con.isLoading.value
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : AppButton(
-                      onPressed: () async {
-                        if (con.isEdit == false) {
-                          if (con.validation()) {
-                            FocusScope.of(context).unfocus();
-                            con.isLoading.value = true;
+              if (!con.isCompleted.value)
+                AppButton(
+                  loader: con.isLoading.value,
+                  loaderColor: AppColors.backgroundLight,
+                  onPressed: () async {
+                    if (con.isEdit == false) {
+                      if (con.validation()) {
+                        FocusScope.of(context).unfocus();
+                        con.isLoading.value = true;
+                        con.isSave = true;
 
-                            /// CREATE TODO-DATA API
-                            await HomeRepository.createTodoApi(
-                              isLoader: con.isLoading,
-                              title: con.title.value.text,
-                              description: con.description.value.text,
-                              isCompleted: false,
-                              onSuccess: (newId) async {
-                                if (isRegistered<HomeController>()) {
-                                  final HomeController homeController = Get.find<HomeController>();
+                        /// CREATE TODO-DATA API
+                        await HomeRepository.createTodoApi(
+                          isLoader: con.isLoading,
+                          title: con.title.value.text,
+                          description: con.description.value.text,
+                          isCompleted: false,
+                          onSuccess: (newId) async {
+                            if (isRegistered<HomeController>()) {
+                              final HomeController homeController = Get.find<HomeController>();
 
-                                  homeController.todoList.add(
-                                    GetTodoModel(
-                                      id: newId,
-                                      title: con.title.value.text,
-                                      description: con.description.value.text,
-                                      isCompleted: false,
-                                    ),
-                                  );
-                                  LocalStorage.savePendingTodo(
-                                    GetTodoModel(
-                                      id: newId,
-                                      title: con.title.value.text,
-                                      description: con.description.value.text,
-                                      isCompleted: false,
-                                    ),
-                                  );
-                                  // homeController.todoList.refresh();
-                                }
-                                con.clearData();
-                                Get.back();
-                              },
-                            );
-                          }
-                        } else {
-                          if (con.validation()) {
-                            FocusScope.of(context).unfocus();
-                            // con.isLoading.value = true;
+                              homeController.todoList.add(
+                                GetTodoModel(
+                                  id: newId,
+                                  title: con.title.value.text.trim(),
+                                  description: con.description.value.text.trim(),
+                                  isCompleted: false,
+                                ),
+                              );
+                              LocalStorage.savePendingTodo(
+                                GetTodoModel(
+                                  id: newId,
+                                  title: con.title.value.text.trim(),
+                                  description: con.description.value.text.trim(),
+                                  isCompleted: false,
+                                ),
+                              );
+                              // homeController.todoList.refresh();
+                            }
+                            con.clearData();
+                            Get.back();
+                          },
+                        );
+                      }
+                    } else {
+                      if (con.validation()) {
+                        FocusScope.of(context).unfocus();
+                        // con.isLoading.value = true;
 
-                            /// UPDATE A TODO DATA
-                            await HomeRepository.upDateTodoApi(
-                              todoId: con.todoId,
-                              isLoader: con.isLoading,
-                              title: con.title.value.text,
-                              description: con.description.value.text,
-                              isCompleted: con.isCompleted.value,
-                              onSuccess: () async {
-                                if (isRegistered<HomeController>()) {
-                                  final HomeController homeController = Get.find<HomeController>();
-                                  int index = homeController.todoList.indexWhere((e) => e.id == con.todoId);
-                                  if (index != -1) {
-                                    homeController.todoList[index] = GetTodoModel(
-                                      id: con.todoModel.id,
-                                      title: con.title.value.text,
-                                      description: con.description.value.text,
-                                      isCompleted: con.todoModel.isCompleted,
-                                    );
+                        /// UPDATE A TODO DATA
+                        await HomeRepository.upDateTodoApi(
+                          todoId: con.todoId,
+                          isLoader: con.isLoading,
+                          title: con.title.value.text.trim(),
+                          description: con.description.value.text.trim(),
+                          isCompleted: con.isCompleted.value,
+                          onSuccess: () async {
+                            if (isRegistered<HomeController>()) {
+                              final HomeController homeController = Get.find<HomeController>();
+                              int index = homeController.todoList.indexWhere((e) => e.id == con.todoId);
+                              if (index != -1) {
+                                homeController.todoList[index] = GetTodoModel(
+                                  id: con.todoModel.id,
+                                  title: con.title.value.text.trim(),
+                                  description: con.description.value.text.trim(),
+                                  isCompleted: con.todoModel.isCompleted,
+                                );
+                                LocalStorage.updatePendingTodoById(
+                                  con.todoId,
+                                  GetTodoModel(
+                                    id: con.todoId,
+                                    title: con.title.value.text,
+                                    description: con.description.value.text,
+                                    isCompleted: con.isCompleted.value,
+                                  ),
+                                );
 
-                                    homeController.todoList.refresh();
-                                  }
-                                  con.isLoading.value = false;
-                                }
-                                con.clearData();
-                                Get.back();
-                              },
-                            );
-                          }
-                        }
-                      },
-                      title: con.isEdit ? 'UpDate' : 'Save',
-                      backgroundColor: AppColors.kPrimaryColor,
-                      titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
-                            fontFamily: 'Bodoni',
-                          ),
-                    ),
-              (defaultPadding / 2).verticalSpace,
+                                homeController.todoList.refresh();
+                              }
+                              con.isLoading.value = false;
+                            }
+                            con.clearData();
+                            Get.back();
+                          },
+                        );
+                      }
+                    }
+                  },
+                  title: con.isEdit ? 'Update' : 'Save',
+                  backgroundColor: AppColors.kPrimaryColor,
+                  titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(fontFamily: 'Inter-Bold', fontSize: 20),
+                ),
+              (defaultPadding).verticalSpace,
               AppButton(
+                title: con.isCompleted.value ? 'Back' : 'Cancel',
+                backgroundColor: AppColors.redColor,
+                disableButton: con.isSave? true : false,
+                titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(fontFamily: 'Inter-Bold', fontSize: 20),
                 onPressed: () {
                   con.clearData();
                   Get.back();
                 },
-                title: 'Cancel',
-                backgroundColor: AppColors.redColor,
-                titleStyle: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundLight).copyWith(
-                      fontFamily: 'Bodoni',
-                    ),
               ),
             ],
           ),

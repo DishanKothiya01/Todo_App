@@ -46,6 +46,7 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   connectivity_plus: ^5.0.2
   get_storage: ^2.1.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,12 @@ flutter:
     - family: Bodoni
       fonts:
         - asset: assets/fonts/Bodoni-Bold.ttf
+    - family: Inter-Medium
+      fonts:
+        - asset: assets/fonts/Inter-Medium.ttf
+    - family: Inter-Bold
+      fonts:
+        - asset: assets/fonts/Inter-Bold.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
