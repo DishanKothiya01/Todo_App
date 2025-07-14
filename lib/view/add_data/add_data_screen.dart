@@ -30,7 +30,7 @@ class AddDataScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundLight,
           title: Text(
-            con.isEdit == false ? 'ADD DATA' : 'UPDATE DATA',
+            con.isEdit == false ? 'Add Data' : 'Update Data',
             style: AppTextStyle.titleStyle(context)?.copyWith(color: AppColors.backgroundDark).copyWith(fontFamily: 'Inter-Bold'),
           ),
         ),
@@ -126,8 +126,7 @@ class AddDataScreen extends StatelessWidget {
                     } else {
                       if (con.validation()) {
                         FocusScope.of(context).unfocus();
-                        // con.isLoading.value = true;
-
+                        con.isSave = true;
                         /// UPDATE A TODO DATA
                         await HomeRepository.upDateTodoApi(
                           todoId: con.todoId,

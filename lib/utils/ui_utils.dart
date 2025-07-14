@@ -17,7 +17,7 @@ class UiUtils {
       message,
       backgroundColor: AppColors.gradientEnd.withAlpha(80),
       colorText: AppColors.backgroundDark,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       margin: const EdgeInsets.all(12),
       borderRadius: 12,
       duration: const Duration(seconds: 2),
